@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>For My Princess — Nov 18</title>
+
+  <meta name="description" content="A romantic surprise website for Princess Day" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg-dark: rgba(0,0,0,0.45);
+      --accent: #ff6b81;
+      --accent-2: #ffd6e0;
+      --white: #fff;
+      --font: 'Poppins', system-ui, -apple-system, sans-serif;
+    }
+
+    *{box-sizing:border-box}
+    html,body{
+      height:100%;
+      margin:0;
+      font-family:var(--font);
+      background:#000;
+      color:var(--white);
+    }
+
+    .hero{
+      position:relative;
+      height:100vh;
+      width:100%;
+      overflow:hidden;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .bg{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      z-index:0;
+    }
+
+    .bg-fallback{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      z-index:0;
+      display:none;
+    }
+
+    .overlay{
+      position:relative;
+      z-index:3;
+      text-align:center;
+      padding:2rem;
+      background:linear-gradient(180deg, rgba(0,0,0,0.2), rgba(0,0,0,0.45));
+      border-radius:16px;
+      backdrop-filter: blur(4px);
+      max-width:90%;
+      margin:1rem;
+    }
+
+    .title{
+      font-size:clamp(2rem,6vw,3.5rem);
+      margin:0 0 .3rem;
+      font-weight:800;
+      letter-spacing:.6px;
+    }
+
+    .subtitle{
+      margin:0 0 1.2rem;
+      font-weight:300;
+      opacity:.95;
+    }
+
+    .controls{
+      display:flex;
+      gap:0.6rem;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:center;
+    }
+
+    /* .countdown styles removed (countdown UI deleted) */
+
+    .btn{
+      background:transparent;
+      border:1px solid rgba(255,255,255,0.18);
+      padding:.55rem .9rem;
+      border-radius:10px;
+      color:var(--white);
+      cursor:pointer;
+    }
+
+    .btn.primary{
+      background:linear-gradient(90deg,var(--accent),var(--accent-2));
+      border:none;
+      color:#111;
+      font-weight:700;
+    }
+
+    .floating{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      z-index:2;
+    }
+
+    /* Modal */
+    .modal{
+      position:fixed;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:rgba(0,0,0,0.6);
+      z-index:9999;
+    }
+
+    .hidden{display:none}
+
+    .modal-content{
+      background:#fff;
+      color:#111;
+      padding:1.5rem;
+      border-radius:14px;
+      max-width:420px;
+      width:92%;
+      text-align:center;
+      position:relative;
+    }
+
+    .modal-content .gift{
+      width:100%;
+      border-radius:12px;
+      margin-bottom:.8rem;
+    }
+
+    .modal-content .message{
+      color:#444;
+      margin-bottom:1rem;
+    }
+
+    .close{
+      position:absolute;
+      right:.6rem;
+      top:.45rem;
+      background:transparent;
+      border:none;
+      font-size:1.2rem;
+      cursor:pointer;
+    }
+
+    /* Hearts animation */
+    .heart{
+      position:absolute;
+      width:36px;
+      height:36px;
+      transform:translate(-50%,-50%);
+      opacity:0.95;
+    }
+
+    @keyframes floatUp {
+      0%{transform:translateY(40vh) scale(.7);opacity:0}
+      10%{opacity:1}
+      100%{transform:translateY(-20vh) scale(1.1);opacity:0}
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="hero">
+
+    <!-- Background Video -->
+    <video id="bgvideo" class="bg" playsinline muted loop preload="auto">
+      <source src="assets/video.mp4" type="video/mp4">
+    </video>
+
+    <!-- Fallback image -->
+    <img id="fallback" class="bg-fallback" src="assets/fallback.jpg">
+
+    <!-- Text Overlay -->
+    <div class="overlay">
+      <h1 class="title">Happy Princess Day ✨💓</h1>
+      <p class="subtitle">For you — myii everything myii bachaaa</p>
+
+      <div class="controls">
+        <button id="revealBtn" class="btn primary">Reveal</button>
+      </div>
+    </div>
+
+    <div id="floatingHearts" class="floating"></div>
+
+  </div>
+
+  <!-- Modal -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-content">
+      <button id="closeModal" class="close">✕</button>
+      <h2>For My Princess</h2>
+      <p class="message">Happy Princess Day, my love. 👑<br><br>
+      I hate that I can’t just grab your hand right now. Dur rehkar bhi, you’re still the only one on my mind and heart 💓❤.. I love seeing your notification on my phone, our late night talks (thode jyada video call kar liyaa karooo 😋😋), and the way your voice changes my whole mood.. Babyyyy, Distance is hard, hain na? but loving you is the best part of my life. 💓💓<br><br>
+      You’ll always be myii princess and myii chiji, no matter how far you are.💓❤</p>
+  <!-- Photo inserted below message; updated to the uploaded filename -->
+  <img src="assets/hhhehe.jpg" class="gift" alt="Photo of my princess">
+    </div>
+  </div>
+
+  <!-- Music element removed (music toggle removed) -->
+
+
+  <script>
+  const revealBtn = document.getElementById('revealBtn');
+  const modal = document.getElementById('modal');
+  const closeModal = document.getElementById('closeModal');
+  const floatingEl = document.getElementById('floatingHearts');
+  const bgvideo = document.getElementById('bgvideo');
+  const fallback = document.getElementById('fallback');
+
+    /* Countdown removed */
+
+    /* Modal */
+    revealBtn.onclick = () => modal.classList.remove('hidden');
+    closeModal.onclick = () => modal.classList.add('hidden');
+    modal.onclick = e => { if(e.target === modal) modal.classList.add('hidden'); };
+
+    /* Music removed */
+
+    /* Background fallback */
+    bgvideo.onerror = () => {
+      fallback.style.display = "block";
+      bgvideo.style.display = "none";
+    };
+
+    /* Hearts */
+    function spawnHeart(){
+      const h = document.createElement('div');
+      h.className = 'heart';
+      h.innerHTML = "❤";
+      h.style.left = Math.random()*100 + "%";
+      h.style.fontSize = (18 + Math.random()*32)+"px";
+  // make hearts float a little faster: shorter random duration (4-8s)
+  const dur = 6 + Math.random()*6;
+  // animation property needs to be a string; use template literal
+  h.style.animation = `floatUp ${dur}s ease-in forwards`;
+      floatingEl.appendChild(h);
+      setTimeout(()=>h.remove(), dur*1000);
+    }
+
+  // spawn hearts slightly more frequently
+  setInterval(spawnHeart, 70);
+  </script>
+
+</body>
+</html>
