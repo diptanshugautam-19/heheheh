@@ -22,7 +22,7 @@
       height:100%;
       margin:0;
       font-family:var(--font);
-      background:#000;
+      background:#000; /* page background forced black */
       color:var(--white);
     }
 
@@ -43,6 +43,7 @@
       height:100%;
       object-fit:cover;
       z-index:0;
+      background-color:#000; /* ensure black behind transparent pixels */
     }
 
     .bg-fallback{
@@ -87,8 +88,6 @@
       align-items:center;
       justify-content:center;
     }
-
-    /* .countdown styles removed (countdown UI deleted) */
 
     .btn{
       background:transparent;
@@ -172,6 +171,41 @@
       10%{opacity:1}
       100%{transform:translateY(-20vh) scale(1.1);opacity:0}
     }
+
+    /* ---------- New: hide browser / webview play controls & overlay ---------- */
+
+    /* Hide built-in controls (Chrome / Android WebView) */
+    video::-webkit-media-controls { display: none !important; }
+    video::-webkit-media-controls-play-button { display: none !important; }
+    video::-webkit-media-controls-start-playback-button { display: none !important; }
+    video::-webkit-media-controls-overlay-play-button { display: none !important; }
+    video::-webkit-media-controls-panel { display: none !important; }
+
+    /* For other engines */
+    video::-moz-media-controls { display: none !important; }
+    video::-ms-clear { display: none !important; }
+
+    /* force video visual styles */
+    video {
+      background-color: #000 !important;
+      background: #000 !important;
+      object-fit: cover !important;
+      outline: none !important;
+      border: none !important;
+      -webkit-appearance: none !important;
+      appearance: none !important;
+      /* pointer-events left enabled so overlay and buttons still work.
+         If you want the video to ignore clicks, set pointer-events: none; */
+    }
+
+  /* remove any poster image showing as play overlay */
+  /* The 'poster' property is not valid in CSS. To remove a poster, do it via HTML or JS. */
+
+    /* Fallback: make overlay/backdrop opaque black if needed */
+    .overlay, .modal, .floating { background-clip: padding-box; }
+
+    /* If absolutely necessary for stubborn webviews, you can temporarily test with this:
+       * { background-color: #000 !important; }  (aggressive, not recommended long-term) */
   </style>
 </head>
 
@@ -180,7 +214,7 @@
   <div class="hero">
 
     <!-- Background Video -->
-    <video id="bgvideo" class="bg" playsinline muted loop preload="auto">
+    <video id="bgvideo" class="bg" autoplay muted loop playsinline preload="auto" muted>
       <source src="assets/video.mp4" type="video/mp4">
     </video>
 
@@ -214,9 +248,6 @@
     </div>
   </div>
 
-  <!-- Music element removed (music toggle removed) -->
-
-
   <script>
   const revealBtn = document.getElementById('revealBtn');
   const modal = document.getElementById('modal');
@@ -225,20 +256,35 @@
   const bgvideo = document.getElementById('bgvideo');
   const fallback = document.getElementById('fallback');
 
-    /* Countdown removed */
-
     /* Modal */
     revealBtn.onclick = () => modal.classList.remove('hidden');
     closeModal.onclick = () => modal.classList.add('hidden');
     modal.onclick = e => { if(e.target === modal) modal.classList.add('hidden'); };
-
-    /* Music removed */
 
     /* Background fallback */
     bgvideo.onerror = () => {
       fallback.style.display = "block";
       bgvideo.style.display = "none";
     };
+
+    /* Try to autoplay programmatically (helps in some WebView builds) */
+    function tryPlayVideo(){
+      if(!bgvideo) return;
+      const p = bgvideo.play();
+      if (p !== undefined) {
+        p.then(() => {
+          // autoplay succeeded
+        }).catch((err) => {
+          // autoplay blocked — video still silent/muted required in many webviews.
+          console.warn("autoplay blocked:", err);
+        });
+      }
+    }
+
+    // attempt autoplay when DOM is ready
+    document.addEventListener('DOMContentLoaded', tryPlayVideo);
+    // also try after a short delay (some webviews need user gesture or timeout)
+    setTimeout(tryPlayVideo, 500);
 
     /* Hearts */
     function spawnHeart(){
@@ -247,17 +293,15 @@
       h.innerHTML = "❤";
       h.style.left = Math.random()*100 + "%";
       h.style.fontSize = (18 + Math.random()*32)+"px";
-  // make hearts float a little faster: shorter random duration (4-8s)
-  const dur = 6 + Math.random()*6;
-  // animation property needs to be a string; use template literal
-  h.style.animation = `floatUp ${dur}s ease-in forwards`;
+      const dur = 6 + Math.random()*6;
+      h.style.animation = `floatUp ${dur}s ease-in forwards`;
       floatingEl.appendChild(h);
       setTimeout(()=>h.remove(), dur*1000);
     }
 
-  // spawn hearts slightly more frequently
-  setInterval(spawnHeart, 70);
+    setInterval(spawnHeart, 70);
   </script>
 
 </body>
 </html>
+
