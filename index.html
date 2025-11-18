@@ -10,7 +10,6 @@
 
   <style>
     :root{
-      --bg-dark: rgba(0,0,0,0.45);
       --accent: #ff6b81;
       --accent-2: #ffd6e0;
       --white: #fff;
@@ -21,9 +20,10 @@
     html,body{
       height:100%;
       margin:0;
-      font-family:var(--font);
-      background:#000; /* page background forced black */
+      background:#000;
       color:var(--white);
+      font-family:var(--font);
+      overscroll-behavior: none;
     }
 
     .hero{
@@ -34,6 +34,7 @@
       display:flex;
       align-items:center;
       justify-content:center;
+      background:#000;
     }
 
     .bg{
@@ -43,7 +44,7 @@
       height:100%;
       object-fit:cover;
       z-index:0;
-      background-color:#000; /* ensure black behind transparent pixels */
+      background:#000 !important;
     }
 
     .bg-fallback{
@@ -54,6 +55,7 @@
       object-fit:cover;
       z-index:0;
       display:none;
+      background:#000;
     }
 
     .overlay{
@@ -81,13 +83,7 @@
       opacity:.95;
     }
 
-    .controls{
-      display:flex;
-      gap:0.6rem;
-      flex-wrap:wrap;
-      align-items:center;
-      justify-content:center;
-    }
+    .controls{display:flex;gap:.7rem;justify-content:center;}
 
     .btn{
       background:transparent;
@@ -112,19 +108,25 @@
       z-index:2;
     }
 
-    /* Modal */
+    /* ---------------- Hide native video controls & force black background ---------------- */
+    video::-webkit-media-controls { display:none !important; }
+    video::-webkit-media-controls-play-button { display:none !important; }
+    video::-webkit-media-controls-start-playback-button { display:none !important; }
+    video::-webkit-media-controls-overlay-play-button { display:none !important; }
+    video::-webkit-media-controls-panel { display:none !important; }
+    video { pointer-events:none !important; background:#000 !important; object-fit:cover !important; }
+
+    /* ---------------- Style modal and message ---------------- */
     .modal{
       position:fixed;
       inset:0;
       display:flex;
       align-items:center;
       justify-content:center;
-      background:rgba(0,0,0,0.6);
+      background:rgba(0,0,0,0.75);
       z-index:9999;
     }
-
     .hidden{display:none}
-
     .modal-content{
       background:#fff;
       color:#111;
@@ -139,12 +141,14 @@
     .modal-content .gift{
       width:100%;
       border-radius:12px;
-      margin-bottom:.8rem;
+      margin-top:1rem;
     }
 
-    .modal-content .message{
-      color:#444;
-      margin-bottom:1rem;
+    .message{
+      margin:.6rem 0 1rem;
+      font-size:1rem;
+      line-height:1.5rem;
+      color:#222;
     }
 
     .close{
@@ -157,55 +161,18 @@
       cursor:pointer;
     }
 
-    /* Hearts animation */
+    /* Heart animation */
     .heart{
       position:absolute;
-      width:36px;
-      height:36px;
       transform:translate(-50%,-50%);
       opacity:0.95;
+      color:red;
     }
-
     @keyframes floatUp {
       0%{transform:translateY(40vh) scale(.7);opacity:0}
-      10%{opacity:1}
+      15%{opacity:1}
       100%{transform:translateY(-20vh) scale(1.1);opacity:0}
     }
-
-    /* ---------- New: hide browser / webview play controls & overlay ---------- */
-
-    /* Hide built-in controls (Chrome / Android WebView) */
-    video::-webkit-media-controls { display: none !important; }
-    video::-webkit-media-controls-play-button { display: none !important; }
-    video::-webkit-media-controls-start-playback-button { display: none !important; }
-    video::-webkit-media-controls-overlay-play-button { display: none !important; }
-    video::-webkit-media-controls-panel { display: none !important; }
-
-    /* For other engines */
-    video::-moz-media-controls { display: none !important; }
-    video::-ms-clear { display: none !important; }
-
-    /* force video visual styles */
-    video {
-      background-color: #000 !important;
-      background: #000 !important;
-      object-fit: cover !important;
-      outline: none !important;
-      border: none !important;
-      -webkit-appearance: none !important;
-      appearance: none !important;
-      /* pointer-events left enabled so overlay and buttons still work.
-         If you want the video to ignore clicks, set pointer-events: none; */
-    }
-
-  /* remove any poster image showing as play overlay */
-  /* The 'poster' property is not valid in CSS. To remove a poster, do it via HTML or JS. */
-
-    /* Fallback: make overlay/backdrop opaque black if needed */
-    .overlay, .modal, .floating { background-clip: padding-box; }
-
-    /* If absolutely necessary for stubborn webviews, you can temporarily test with this:
-       * { background-color: #000 !important; }  (aggressive, not recommended long-term) */
   </style>
 </head>
 
@@ -214,93 +181,147 @@
   <div class="hero">
 
     <!-- Background Video -->
-  <video id="bgvideo" class="bg" autoplay muted loop playsinline preload="auto" playsinline disablepictureinpicture controlslist="nodownload nofullscreen noremoteplayback" controls="false">
+    <video id="bgvideo" class="bg" autoplay muted playsinline loop preload="auto">
       <source src="assets/video.mp4" type="video/mp4">
     </video>
 
-    <!-- Fallback image -->
-    <img id="fallback" class="bg-fallback" src="assets/fallback.jpg">
+    <!-- Fallback -->
+    <img id="fallback" class="bg-fallback" src="assets/fallback.jpg" alt="fallback">
 
-    <!-- Text Overlay -->
     <div class="overlay">
       <h1 class="title">Happy Princess Day ✨💓</h1>
       <p class="subtitle">For you — myii everything myii bachaaa</p>
-
       <div class="controls">
         <button id="revealBtn" class="btn primary">Reveal</button>
       </div>
     </div>
 
     <div id="floatingHearts" class="floating"></div>
-
   </div>
 
   <!-- Modal -->
-  <div id="modal" class="modal hidden">
-    <div class="modal-content">
-      <button id="closeModal" class="close">✕</button>
-      <h2>For My Princess</h2>
-      <p class="message">Happy Princess Day, my love. 👑<br><br>
-      I hate that I can’t just grab your hand right now. Dur rehkar bhi, you’re still the only one on my mind and heart 💓❤.. I love seeing your notification on my phone, our late night talks (thode jyada video call kar liyaa karooo 😋😋), and the way your voice changes my whole mood.. Babyyyy, Distance is hard, hain na? but loving you is the best part of my life. 💓💓<br><br>
+  <div id="modal" class="modal hidden" aria-hidden="true">
+    <div class="modal-content" role="dialog" aria-modal="true">
+      <button id="closeModal" class="close" aria-label="Close">✕</button>
+      <h2>For My Princess 💗</h2>
+
+      <p class="message">
+        Happy Princess Day, my love. 👑💓<br><br>
+       I hate that I can’t just grab your hand right now. Dur rehkar bhi, you’re still the only one on my mind and heart 💓❤.. I love seeing your notification on my phone, our late night talks (thode jyada video call kar liyaa karooo 😋😋), and the way your voice changes my whole mood.. Babyyyy, Distance is hard, hain na? but loving you is the best part of my life. 💓💓<br><br>
       You’ll always be myii princess and myii chiji, no matter how far you are.💓❤</p>
-  <!-- Photo inserted below message; updated to the uploaded filename -->
-  <img src="assets/hhhehe.jpg" class="gift" alt="Photo of my princess">
+      </p>
+
+      <img src="assets/hhhehe.jpg" class="gift" alt="My Princess Photo">
     </div>
   </div>
 
   <script>
-  const revealBtn = document.getElementById('revealBtn');
-  const modal = document.getElementById('modal');
-  const closeModal = document.getElementById('closeModal');
-  const floatingEl = document.getElementById('floatingHearts');
-  const bgvideo = document.getElementById('bgvideo');
-  const fallback = document.getElementById('fallback');
+    const revealBtn = document.getElementById('revealBtn');
+    const modal = document.getElementById('modal');
+    const closeModal = document.getElementById('closeModal');
+    const floatingEl = document.getElementById('floatingHearts');
+    const bgvideo = document.getElementById('bgvideo');
+    const fallback = document.getElementById('fallback');
 
-    /* Modal */
-    revealBtn.onclick = () => modal.classList.remove('hidden');
-    closeModal.onclick = () => modal.classList.add('hidden');
-    modal.onclick = e => { if(e.target === modal) modal.classList.add('hidden'); };
+    revealBtn.onclick = () => {
+      modal.classList.remove('hidden');
+      modal.setAttribute('aria-hidden','false');
+    };
+    closeModal.onclick = () => {
+      modal.classList.add('hidden');
+      modal.setAttribute('aria-hidden','true');
+    };
+    modal.onclick = e => { if(e.target === modal) { modal.classList.add('hidden'); modal.setAttribute('aria-hidden','true'); } };
 
-    /* Background fallback */
     bgvideo.onerror = () => {
-      fallback.style.display = "block";
       bgvideo.style.display = "none";
+      fallback.style.display = "block";
     };
 
-    /* Try to autoplay programmatically (helps in some WebView builds) */
+    // Try to autoplay (muted)
     function tryPlayVideo(){
       if(!bgvideo) return;
+      bgvideo.muted = true;
+      bgvideo.playsInline = true;
       const p = bgvideo.play();
-      if (p !== undefined) {
-        p.then(() => {
-          // autoplay succeeded
-        }).catch((err) => {
-          // autoplay blocked — video still silent/muted required in many webviews.
-          console.warn("autoplay blocked:", err);
-        });
-      }
+      if(p && p.catch) p.catch(()=>{ /* autoplay may be blocked */ });
     }
-
-    // attempt autoplay when DOM is ready
     document.addEventListener('DOMContentLoaded', tryPlayVideo);
-    // also try after a short delay (some webviews need user gesture or timeout)
     setTimeout(tryPlayVideo, 500);
 
-    /* Hearts */
+    // Cleanly remove likely injected play overlays while preserving your overlay/modal:
+    function isPartOfOurUI(el){
+      if(!el) return false;
+      // if element is the overlay or modal or inside them, don't remove
+      if(el.closest && (el.closest('.overlay') || el.closest('.modal'))) return true;
+      return false;
+    }
+
+    function removeInjectedOverlays(){
+      // Safer selectors — target elements commonly injected by builders or wrappers
+      const selectors = [
+        '.median-player',
+        '.median-overlay',
+        '[data-testid*="play"]',
+        '[data-testid*="Play"]',
+        'button[aria-label*="play"]',
+        'button[title*="Play"]',
+        '.play-icon',
+        '.wm-play-overlay',
+        '.webplayer-overlay'
+      ];
+      selectors.forEach(sel=>{
+        document.querySelectorAll(sel).forEach(el=>{
+          if(isPartOfOurUI(el)) return; // skip our content
+          try{ el.remove(); } catch(e){ el.style.display='none'; el.style.visibility='hidden'; }
+        });
+      });
+
+      // Also remove big centered SVG triangles or similar heuristics (but ensure not our overlay)
+      document.querySelectorAll('svg, path').forEach(node=>{
+        const el = node instanceof SVGElement ? node : null;
+        if(!el) return;
+        const parent = el.closest('div, button, span') || el.parentElement;
+        if(!parent) return;
+        if(isPartOfOurUI(parent)) return;
+        const r = parent.getBoundingClientRect();
+        // heuristic: fairly large, centered overlay-like element
+        const centerX = (r.left + r.right)/2;
+        if(r.width > 40 && r.height > 40 && Math.abs(centerX - window.innerWidth/2) < (window.innerWidth * 0.4)){
+          try{ parent.remove(); } catch(e){ parent.style.display='none'; }
+        }
+      });
+    }
+
+    // Run removal now
+    removeInjectedOverlays();
+
+    // Observe DOM for future injections and remove safely
+    const observer = new MutationObserver(mutations => {
+      let added = false;
+      for(const m of mutations){
+        if(m.addedNodes && m.addedNodes.length){ added = true; break; }
+      }
+      if(added) removeInjectedOverlays();
+    });
+    observer.observe(document.documentElement || document.body, { childList:true, subtree:true });
+
+    // Hearts spawn
     function spawnHeart(){
       const h = document.createElement('div');
-      h.className = 'heart';
-      h.innerHTML = "❤";
+      h.className='heart';
+      h.innerHTML="❤";
       h.style.left = Math.random()*100 + "%";
-      h.style.fontSize = (18 + Math.random()*32)+"px";
+      h.style.fontSize = (18 + Math.random()*32) + "px";
       const dur = 6 + Math.random()*6;
       h.style.animation = `floatUp ${dur}s ease-in forwards`;
       floatingEl.appendChild(h);
       setTimeout(()=>h.remove(), dur*1000);
     }
-
-    setInterval(spawnHeart, 70);
+    setInterval(spawnHeart, 80);
   </script>
 
 </body>
 </html>
+
+
